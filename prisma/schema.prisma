@@ -1,0 +1,25 @@
+// ShineOne Estate — Prisma schema
+// Datasource: PostgreSQL (Neon preferred / Railway alternative)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model InspectionRequest {
+  id               String   @id @default(cuid())
+  name             String
+  mobile           String
+  email            String
+  propertyLocation String
+  preferredDate    DateTime
+  preferredTime    String
+  createdAt        DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("inspection_requests")
+}
