@@ -60,15 +60,13 @@ export async function POST(request: Request) {
 
     // 2. Notify the admin by email. A failure here should not lose the lead,
     //    so it is handled independently and logged.
-    try {
-      await sendAdminNotification({
-        ...data,
-        preferredDateObj,
-        createdAt: record.createdAt,
-      });
-    } catch (emailError) {
-      console.error('Inspection saved but admin email failed:', emailError);
-    }
+    sendAdminNotification({
+  ...data,
+  preferredDateObj,
+  createdAt: record.createdAt,
+}).catch((emailError) => {
+  console.error('Inspection saved but admin email failed:', emailError);
+});
 
     return NextResponse.json({ success: true, id: record.id }, { status: 201 });
   } catch (error) {
