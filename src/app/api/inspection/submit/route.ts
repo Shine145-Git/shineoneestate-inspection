@@ -5,6 +5,17 @@ import { sendAdminNotification } from '@/lib/email';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+export async function GET() {
+
+  return NextResponse.json({
+
+    success: true,
+
+    message: "Server is running",
+
+  });
+
+}
 
 export async function POST(request: Request) {
   let body: unknown;
