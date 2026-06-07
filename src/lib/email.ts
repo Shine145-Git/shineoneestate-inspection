@@ -44,6 +44,10 @@ export async function sendAdminNotification(
 ): Promise<void> {
   const adminEmail = process.env.ADMIN_EMAIL;
 
+  if (!process.env.RESEND_API_KEY) {
+    throw new Error('RESEND_API_KEY is not configured.');
+  }
+
   if (!adminEmail) {
     throw new Error('ADMIN_EMAIL is not configured.');
   }
@@ -78,6 +82,7 @@ export async function sendAdminNotification(
   const htmlBody = `
   <div style="font-family:Arial,Helvetica,sans-serif;background:#F5F0E8;padding:24px;">
     <div style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:8px;overflow:hidden;border:1px solid #e6ddca;">
+      
       <div style="background:#0C0F1A;padding:20px 24px;">
         <p style="margin:0;color:#C9A84C;letter-spacing:2px;font-size:12px;text-transform:uppercase;">
           ShineOne Estate
@@ -90,21 +95,35 @@ export async function sendAdminNotification(
       <table style="width:100%;border-collapse:collapse;">
         ${tableRows}
       </table>
+
+      <div style="padding:16px 24px;background:#F5F0E8;color:#555;font-size:12px;">
+        This is an automated notification from the ShineOne Estate booking system.
+      </div>
+
     </div>
   </div>`;
 
+  console.log('===================================');
+  console.log('Sending inspection email');
+  console.log('To:', adminEmail);
+  console.log('From: noreply@shineoneestate.co.in');
+  console.log('===================================');
+
   const { data, error } = await resend.emails.send({
-    from: 'ShineOne Estate <onboarding@resend.dev>',
-    to: adminEmail,
+    from: 'ShineOne Estate <noreply@shineoneestate.co.in>',
+    to: [adminEmail],
     replyTo: payload.email,
     subject: `New Inspection Request — ${payload.name}`,
     html: htmlBody,
   });
+
+  console.log('Resend response:', { data, error });
 
   if (error) {
     console.error('Resend Error:', error);
     throw new Error(error.message);
   }
 
-  console.log('Email sent successfully:', data?.id);
+  console.log('Email sent successfully!');
+  console.log('Email ID:', data?.id);
 }
