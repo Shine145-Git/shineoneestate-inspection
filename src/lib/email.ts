@@ -1,36 +1,26 @@
 import nodemailer from 'nodemailer';
 import type { InspectionInput } from './validations';
 
-// Build the SMTP transport from environment variables only — never hardcode.
 function getTransport() {
-  const host = process.env.SMTP_HOST;
-  const port = Number(process.env.SMTP_PORT ?? 587);
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
 
-  if (!host || !user || !pass) {
+  if (!user || !pass) {
     throw new Error(
-      'SMTP configuration is missing. Check SMTP_HOST, SMTP_USER, SMTP_PASS.'
+      'SMTP configuration is missing. Check SMTP_USER and SMTP_PASS.'
     );
   }
 
   return nodemailer.createTransport({
-    host,
-    port,
-    secure: port === 465,
+    service: 'gmail',
     auth: {
       user,
       pass,
     },
-
-    // Prevent long hangs
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 10000,
   });
 }
 
-// Format a timestamp in IST (Asia/Kolkata)
+// Format timestamp in IST
 function formatIST(date: Date): string {
   return new Intl.DateTimeFormat('en-IN', {
     timeZone: 'Asia/Kolkata',
@@ -77,17 +67,6 @@ export async function sendAdminNotification(
   }
 
   const transport = getTransport();
-
-  try {
-    console.log('Verifying SMTP connection...');
-
-    await transport.verify();
-
-    console.log('SMTP connection verified successfully.');
-  } catch (error) {
-    console.error('SMTP verification failed:', error);
-    throw error;
-  }
 
   const subject = `New Inspection Request — ${payload.name} — ${payload.propertyLocation}`;
 
